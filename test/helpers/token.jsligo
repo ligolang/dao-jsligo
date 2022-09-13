@@ -15,7 +15,7 @@ export type originated = {
 };
 
 const originate = (tok_amount : nat) : originated => {
-    const f = "./test/bootstrap/single_asset.mligo";
+    const f = "../bootstrap/single_asset.mligo";
     const [init_storage, owners, ops] = SingleAsset_helper.get_initial_storage(
         tok_amount, tok_amount, tok_amount
     );
