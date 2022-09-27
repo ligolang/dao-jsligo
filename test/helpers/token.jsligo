@@ -35,7 +35,7 @@ const originate = (tok_amount : nat) : originated => {
 type single_asset_transfer_param = {
     contr: contr,
     source: address,
-    from: address,
+    from_: address,
     to: address,
     amount: nat
 };
