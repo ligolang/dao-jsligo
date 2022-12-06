@@ -44,7 +44,7 @@ const addOutcome = (o: Outcome.t, s: t) : t => {
     let [proposal, status] = o;
 
     // If proposal is accepted, also create timelock
-    if (Accepted() == status) {
+    if ((Accepted() as Outcome.state) == status) {
         const unlockAt = Tezos.get_now() + int(s.config.timelockDelay);
         proposal = ({ ...proposal, timelock: Some(Timelock.make(
             unlockAt,

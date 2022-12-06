@@ -55,7 +55,7 @@ const transfer = ([contr, from_, to_, amount_] : [contr, address, address, nat])
 const add_operators = ([operators, contr] : [list<SingleAsset.operator>,
 contract<SingleAsset.parameter>]) : unit => {
     const f = ([ys, x] : [list<SingleAsset.unit_update>, SingleAsset.operator])
-    : list<SingleAsset.unit_update> => list([Add_operator(x), ...ys]);
+    : list<SingleAsset.unit_update> => list([(Add_operator(x) as SingleAsset.unit_update), ...ys]);
     const add_operator = List.fold_left (f, (list([]) as list<SingleAsset.unit_update>), operators);
     let r = Test.transfer_to_contract(contr, (Update_operators(add_operator)), 0 as tez);
     Assert.txSuccess(r);

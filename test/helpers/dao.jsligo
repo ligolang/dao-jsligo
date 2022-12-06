@@ -1,6 +1,9 @@
 #import "../../src/main.jsligo" "DAO"
 #import "./assert.jsligo" "Assert"
 
+import Lambda = DAO.Lambda;
+import Outcome = DAO.Outcome;
+
 // Some types for readability
 type taddr = typed_address<DAO.parameter, DAO.storage>;
 type contr = contract<DAO.parameter>;
@@ -11,7 +14,7 @@ export type originated = {
 };
 
 // Some dummy values intended to be used as placeholders
-const dummyPacked = Bytes.pack (OperationList((() => list([]) as list<operation>)));
+const dummyPacked = Bytes.pack (OperationList((() => list([]) as list<operation>)) as Lambda.t);
 const dummyHash = Crypto.sha256 (dummyPacked);
 
 const dummyProposal : DAO.Proposal.makeParams = {
@@ -147,7 +150,7 @@ const assertExecuted = ([taddr, n]: [taddr, nat]) : unit => {
         None: () => Test.failwith("The outcome should exists"),
         Some: (o: Outcome.t) => {
             const [_, state] = o;
-            assert(state == Executed())
+            assert(state == (Executed() as Outcome.state))
         }
     });
 };
