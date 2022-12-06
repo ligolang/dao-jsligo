@@ -89,7 +89,7 @@ const cancel = (outcomeKeyOpt: option<nat>, s: storage) : result =>
                     Errors.notCreator
                 );
                 assert_with_error(
-                    state != Executed(),
+                    state != (Executed() as Outcome.state),
                     Errors.alreadyExecuted
                 );
                 Timelock._checkLocked(p.timelock);

@@ -7,6 +7,8 @@
 #import "./bootstrap/bootstrap.jsligo" "Bootstrap"
 #import "../src/main.jsligo" "DAO"
 
+import Lambda = DAO.Lambda;
+
 const _ = Log.describe("[Execute] test suite");
 
 // Boostrapping of the test environment
@@ -49,7 +51,7 @@ const testSuccessParameterChanged = (() : unit => {
     const baseConfig = DAO_helper.baseConfig;
     const packed = Bytes.pack (ParameterChange(
         () => ({ ...baseConfig, quorumThreshold: 51 as nat })
-    ));
+    ) as Lambda.t);
     const hash_ = Some(Crypto.sha256 (packed));
     const votes = list([
         [0, 25 as nat, true], [1, 25 as nat, true], [2, 25 as nat, true]
@@ -82,7 +84,7 @@ const testSuccessOperationList = (() : unit => {
     const opList = Token_helper.createTransferCallable(
         tok.addr, dao.addr, owner2, owner2AmountToReceive
     );
-    const packed = Bytes.pack(OperationList(opList));
+    const packed = Bytes.pack(OperationList(opList) as Lambda.t);
 
     const owner2AmountLocked = 25 as nat;
     const hash_ = Some(Crypto.sha256 (packed));

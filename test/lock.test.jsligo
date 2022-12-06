@@ -35,9 +35,9 @@ const testSuccess = (() : unit => {
 const testSuccessBeforeVotingStarts = (() : unit => {
     // Add suffiscient start_delay
     const config = { ...baseConfig, startDelay: 86400 as nat };
-    const daoStorage = { ...baseStorage, config: config };
+    let daoStorage = { ...baseStorage, config: config };
     const [tok, dao, sender_] = bootstrap(daoStorage);
-    const daoStorage = Test.get_storage (dao.taddr);
+    daoStorage = Test.get_storage (dao.taddr);
 
     const amount_ = 3 as nat;
     DAO_helper.proposeSuccess(DAO_helper.dummyProposal, dao.contr);

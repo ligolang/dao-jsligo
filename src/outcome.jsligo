@@ -60,7 +60,7 @@ const make = (p: Proposal.t,
 const getExecutableProposal = (outcome: t) : Proposal.t => {
     const [p, state] = outcome;
 
-    if (Accepted() == state) {
+    if ((Accepted() as state) == state) {
         return p;
     }
 
