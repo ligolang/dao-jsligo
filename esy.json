@@ -1,5 +1,5 @@
 {
   "dependencies": {
-    "tezos-ligo-fa2": "^1.0.2"
+    "@ligo/fa": "1.0.0"
   }
 }
