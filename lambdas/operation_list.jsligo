@@ -1,5 +1,5 @@
 #import "../src/lambda.jsligo" "Lambda"
-#import "tezos-ligo-fa2/lib/fa2/asset/single_asset.mligo" "SingleAsset"
+#import "@ligo/fa/lib/fa2/asset/single_asset.mligo" "SingleAsset"
 
 // Sample lambda that calls an FA2 transfer entrypoint
 
@@ -14,7 +14,7 @@ const lambda_ : Lambda.operationList = () => {
             const transfer_requests: SingleAsset.transfer =
                 list([({
                     from_: "KT1BWSmjEhEknnBWSYrrSdhH217osBbwdVos" as address,
-                    tx: list([{
+                    txs: list([{
                         to_: "tz1burnburnburnburnburnburnburjAYjjX" as address,
                         amount: 4000 as nat
                     }]) as list<SingleAsset.atomic_trans>
