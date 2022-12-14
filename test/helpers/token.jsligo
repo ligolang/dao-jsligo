@@ -1,5 +1,5 @@
-#import "tezos-ligo-fa2/lib/fa2/asset/single_asset.mligo" "SingleAsset"
-#import "tezos-ligo-fa2/test/fa2/single_asset.test.mligo" "SingleAsset_helper"
+#import "@ligo/fa/lib/fa2/asset/single_asset.mligo" "SingleAsset"
+#import "@ligo/fa/test/fa2/single_asset.test.mligo" "SingleAsset_helper"
 #import "./assert.jsligo" "Assert"
 #import "../../src/main.jsligo" "DAO"
 
@@ -46,7 +46,7 @@ const transfer = ([contr, from_, to_, amount_] : [contr, address, address, nat])
 : nat => {
     Test.set_source (from_);
     const transfer_requests : SingleAsset.transfer = list([
-      {from_: from_, tx: list([{to_:to_, amount: amount_}])}
+      {from_: from_, txs: list([{to_:to_, amount: amount_, token_id: 0 as nat}])}
     ]);
     Test.transfer_to_contract_exn (contr, (Transfer(transfer_requests)), 0 as tez);
 };
@@ -97,7 +97,7 @@ const createTransferCallable = ([addr, from_, to_, amount_] : [address, address,
         match (transferOpt, {
             Some: (c: contract<SingleAsset.transfer>) => {
                 const transfer_requests: SingleAsset.transfer = list([
-                  {from_: from_, tx: list([{to_: to_, amount: amount_}]) as
+                  {from_: from_, txs: list([{to_: to_, amount: amount_, token_id: 0 as nat}]) as
                   list<SingleAsset.atomic_trans> }
                 ]);
                 const op = Tezos.transaction(transfer_requests, 0 as tez, c);

@@ -1,4 +1,4 @@
-#import "tezos-ligo-fa2/test/helpers/list.mligo" "List_helper"
+#import "@ligo/fa/test/helpers/list.mligo" "List_helper"
 #import "./helpers/dao.jsligo" "DAO_helper"
 #import "./helpers/token.jsligo" "Token_helper"
 #import "./helpers/suite.jsligo" "Suite_helper"
