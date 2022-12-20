@@ -8,10 +8,10 @@
     "authors": [
         "smart-chain <tezos@smart-chain.fr>"
     ],
-    "homepage": "https://github.com/ligolang/dao-jsligo",
+    "homepage": "https://github.com/ligolang/dao-cameligo",
     "source": {
-        "tools": "jsligo",
-        "location": "https://github.com/ligolang/dao-jsligo/src"
+        "tools": "cameligo",
+        "location": "https://github.com/ligolang/dao-cameligo/src"
     },
     "interfaces": [
         "TZIP-016"
