@@ -28,7 +28,7 @@ compile: ## compile contracts
 clean: ## clean up
 	@rm -rf compiled
 
-deploy: compile node_modules deploy.js
+deploy: node_modules deploy.js
 
 deploy.js:
 	@if [ ! -f ./deploy/metadata.json ]; then cp deploy/metadata.json.dist deploy/metadata.json ; fi
