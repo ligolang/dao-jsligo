@@ -8,7 +8,7 @@ const repeat = (str: string, n: nat) : string => {
         };
     };
 
-    loop(n, "");
+    return loop(n, "");
 };
 
 // Log boxed lbl

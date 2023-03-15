@@ -8,10 +8,7 @@ export type votes = map<address, t>;
 //        - sum of votes for,
 //        - sum of votes against.
 const count = (votes : votes) : [nat, nat, nat] => {
-    const sum = (
-        acc: [nat,nat],
-        vote: [address, t]
-    ): [nat, nat] => {
+    const sum = ([acc, vote]: [[nat,nat], [address, t]]): [nat, nat] => {
         const [for_, against] = acc;
         const [_, [choice, nb]] = vote;
 

@@ -61,52 +61,52 @@ const originate = (init_storage: DAO.storage) : originated => {
 };
 
 // Call entry point of DAO contr contract
-const call = ([p, contr] : [DAO.parameter, contr]): test_exec_result =>
+const call = (p: DAO.parameter, contr: contr): test_exec_result =>
     Test.transfer_to_contract (contr, p, 0 as tez);
 
 // Entry points call helpers
-const cancel = ([outcome_key_opt, contr] : [option<nat>, contr]): test_exec_result =>
+const cancel = (outcome_key_opt: option<nat>, contr: contr): test_exec_result =>
     call(Cancel(outcome_key_opt), contr);
 
 const endVote = (contr: contr): test_exec_result => call(EndVote(), contr);
 
-const execute = ([k, packed, contr] : [nat, bytes, contr]): test_exec_result =>
+const execute = (k: nat, packed: bytes, contr: contr): test_exec_result =>
     call(Execute({ outcomeKey: k, packed: packed }), contr);
 
-const lock = ([amount_, contr]: [nat, contr]): test_exec_result => call(Lock(amount_), contr);
+const lock = (amount_: nat, contr: contr): test_exec_result => call(Lock(amount_), contr);
 
-const propose = ([proposal, contr] : [DAO.Proposal.makeParams, contr]): test_exec_result =>
+const propose = (proposal: DAO.Proposal.makeParams, contr: contr): test_exec_result =>
     call(Propose(proposal), contr);
 
-const release = ([amount_, contr]: [nat, contr]): test_exec_result =>
+const release = (amount_: nat, contr: contr): test_exec_result =>
     call(Release(amount_), contr);
 
-const vote = ([choice, contr]: [bool, contr]): test_exec_result => call(Vote(choice), contr);
+const vote = (choice: bool, contr: contr): test_exec_result => call(Vote(choice), contr);
 
 // Asserter helper for successful entry point calls
-const cancelSuccess = ([outcome_key_opt, contr] : [option<nat>, contr]): unit =>
+const cancelSuccess = (outcome_key_opt: option<nat>, contr: contr): unit =>
     Assert.txSuccess(cancel(outcome_key_opt, contr));
 
 const endVoteSuccess = (contr : contr): unit =>
     Assert.txSuccess(endVote(contr));
 
-const executeSuccess = ([k, packed, contr] : [nat, bytes, contr]): unit =>
+const executeSuccess = (k: nat, packed: bytes, contr: contr): unit =>
     Assert.txSuccess(execute(k, packed, contr));
 
-const lockSuccess = ([amount_, contr]: [nat, contr]): unit =>
+const lockSuccess = (amount_: nat, contr: contr): unit =>
     Assert.txSuccess (lock(amount_, contr));
 
-const proposeSuccess = ([proposal, contr] : [DAO.Proposal.makeParams, contr]): unit =>
+const proposeSuccess = (proposal: DAO.Proposal.makeParams, contr: contr): unit =>
     Assert.txSuccess(propose(proposal, contr));
 
-const releaseSuccess = ([amount_, contr]: [nat, contr]): unit =>
+const releaseSuccess = (amount_: nat, contr: contr): unit =>
     Assert.txSuccess(release(amount_, contr));
 
-const voteSuccess = ([choice, contr]: [DAO.Vote.choice, contr]): unit =>
+const voteSuccess = (choice: DAO.Vote.choice, contr: contr): unit =>
     Assert.txSuccess(vote(choice, contr));
 
 // Batch call of lock entry point, WARNING: changes Test framework source
-const batchLock = ([addr_lst, amount_, contr] : [list<address>, nat, contr]) : unit => {
+const batchLock = (addr_lst: list<address>, amount_: nat, contr: contr) : unit => {
     const lock = (addr: address) : unit => {
         Test.set_source (addr);
         lockSuccess(amount_, contr);
@@ -115,7 +115,7 @@ const batchLock = ([addr_lst, amount_, contr] : [list<address>, nat, contr]) : u
 };
 
 // Batch call of vote entry point, WARNING: changes Test framework source
-const batchVote = ([addr_lst, choice, contr] : [list<address>, DAO.Vote.choice, contr]) : unit => {
+const batchVote = (addr_lst: list<address>, choice: DAO.Vote.choice, contr: contr) : unit => {
     const vote = (addr: address) : unit => {
         Test.set_source (addr);
         voteSuccess(choice, contr);
@@ -124,7 +124,7 @@ const batchVote = ([addr_lst, choice, contr] : [list<address>, DAO.Vote.choice, 
 };
 
 // Assert DAO contract at [taddr] has [owner] [amount_] of tokens locked
-const assertLocked = ([taddr, owner, amount_] : [taddr, DAO.Storage.Vault.owner,  nat]) : unit => {
+const assertLocked = (taddr: taddr, owner: DAO.Storage.Vault.owner, amount_: nat) : unit => {
     const s = Test.get_storage(taddr);
     match (Big_map.find_opt(owner, s.vault), {
         Some: (tokens: nat) => assert(tokens == amount_),
@@ -133,7 +133,7 @@ const assertLocked = ([taddr, owner, amount_] : [taddr, DAO.Storage.Vault.owner,
 };
 
 // Assert DAO contract at [taddr] have registered [voter] [choice] with [amount_] votes
-const assertVoted = ([taddr, voter, choice, amount_] : [taddr, address, bool, nat])
+const assertVoted = (taddr: taddr, voter: address, choice: bool, amount_: nat)
 : unit => {
     const s = Test.get_storage (taddr);
     const p = Option.unopt(s.proposal);
@@ -144,7 +144,7 @@ const assertVoted = ([taddr, voter, choice, amount_] : [taddr, address, bool, na
 };
 
 // Assert DAO contract at [taddr] have an outcome occuring for [n] key in Executed state
-const assertExecuted = ([taddr, n]: [taddr, nat]) : unit => {
+const assertExecuted = (taddr: taddr, n: nat) : unit => {
     const s = Test.get_storage (taddr);
     match (Big_map.find_opt(n, s.outcomes), {
         None: () => Test.failwith("The outcome should exists"),
@@ -157,7 +157,7 @@ const assertExecuted = ([taddr, n]: [taddr, nat]) : unit => {
 
 // Assert outcomes [bm] big map have an entry for key [k] and has given [s] state
 const assertProposalState =
-    ([bm, k, s]: [DAO.Storage.outcomes, nat, DAO.Outcome.state]) : unit =>
+    (bm: DAO.Storage.outcomes, k: nat, s: DAO.Outcome.state) : unit =>
     match(Big_map.find_opt(k, bm), {
         Some: (outcome: DAO.Outcome.t) => {
             const [proposal, state] = outcome;

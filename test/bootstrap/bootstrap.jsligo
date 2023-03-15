@@ -18,7 +18,7 @@ const boot = (initTokAmount: nat, initDAOStorage : DAO.storage)
     //    TODO: ... in the real world, remove operator?
     List.iter((owner: address) => {
         Test.set_source(owner);
-        Token_helper.add_operators(list([
+        return Token_helper.add_operators(list([
                 { owner: owner, operator: dao.addr, token_id: (0 as nat) }
             ]), tok.contr);
         }, tok.owners);

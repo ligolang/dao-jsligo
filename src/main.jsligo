@@ -52,10 +52,10 @@ const propose = (p: Proposal.makeParams, s: storage) : result =>
         Some: (_: Proposal.t) => failwith(Errors.proposalAlreadyExists),
         None: () => [
             list([Token.transfer(
-                s.governanceToken,
+                [s.governanceToken,
                 Tezos.get_sender(),
                 Tezos.get_self_address(),
-                s.config.depositAmount
+                s.config.depositAmount]
             )]), Storage.createProposal(
                 Proposal.make(p, s.config.startDelay, s.config.votingPeriod),
                 s)
@@ -64,10 +64,10 @@ const propose = (p: Proposal.makeParams, s: storage) : result =>
 
 const cancel = (outcomeKeyOpt: option<nat>, s: storage) : result =>
    [list([Token.transfer(
-        s.governanceToken,
+        [s.governanceToken,
         Tezos.get_self_address(),
         s.config.burnAddress,
-        s.config.depositAmount)
+        s.config.depositAmount])
    ]), match(outcomeKeyOpt, {
         None: () => match(s.proposal, {
             None: () => failwith(Errors.nothingToCancel),
@@ -78,7 +78,7 @@ const cancel = (outcomeKeyOpt: option<nat>, s: storage) : result =>
                     Errors.notCreator
                 );
 
-                Storage.addOutcome([p, Canceled()], s);
+                return Storage.addOutcome([p, Canceled()], s);
             }}),
         Some: (outcomeKey: nat) => match(Big_map.find_opt(outcomeKey, s.outcomes), {
             None: () => failwith(Errors.outcomeNotFound),
@@ -94,41 +94,41 @@ const cancel = (outcomeKeyOpt: option<nat>, s: storage) : result =>
                 );
                 Timelock._checkLocked(p.timelock);
 
-                Storage.updateOutcome(outcomeKey, [p, Canceled()], s)
+                return Storage.updateOutcome(outcomeKey, [p, Canceled()], s)
             }})
         })
    ];
 
 const lock = (amount_: nat, s: storage) : result => {
     Proposal._checkNoVoteOngoing(s.proposal);
-    const currentAmount = Vault.getForUser(s.vault, Tezos.get_sender());
+    const currentAmount = Vault.getForUser([s.vault, Tezos.get_sender()]);
 
     return [
         list([Token.transfer(
-            s.governanceToken,
+            [s.governanceToken,
             Tezos.get_sender(),
-            Tezos.get_self_address(), amount_)]),
+            Tezos.get_self_address(), amount_])]),
         Storage.updateVault(Vault.updateForUser(
-            s.vault,
+            [s.vault,
             Tezos.get_sender(),
-            currentAmount + amount_), s)
+            currentAmount + amount_]), s)
     ];
 };
 
 const release = (amount_: nat, s: storage) : result => {
     Proposal._checkNoVoteOngoing(s.proposal);
-    const currentAmount = Vault.getForUserExn(s.vault, Tezos.get_sender());
+    const currentAmount = Vault.getForUserExn([s.vault, Tezos.get_sender()]);
     assert_with_error( (currentAmount >= amount_), Errors.notEnoughBalance);
 
     return [
         list([Token.transfer(
-            s.governanceToken,
+            [s.governanceToken,
             Tezos.get_self_address(),
-            Tezos.get_sender(), amount_)]),
+            Tezos.get_sender(), amount_])]),
         Storage.updateVault(Vault.updateForUser(
-            s.vault,
+            [s.vault,
             Tezos.get_sender(),
-            abs(currentAmount - amount_)), s)
+            abs(currentAmount - amount_)]), s)
     ];
 };
 
@@ -137,7 +137,7 @@ const vote = (choice: bool, s: storage) : storage =>
         None: () => failwith(Errors.noProposal),
         Some: (p: Proposal.t) => {
             Proposal._checkIsVotingPeriod(p);
-            const amount_ = Vault.getForUserExn(s.vault, Tezos.get_sender());
+            const amount_ = Vault.getForUserExn([s.vault, Tezos.get_sender()]);
             return Storage.updateVotes(p, [choice, amount_], s);
         }});
 
@@ -165,10 +165,10 @@ const endVote = (s: storage) : result =>
             }
             return [
                 list([Token.transfer(
-                    s.governanceToken,
+                    [s.governanceToken,
                     Tezos.get_self_address(),
                     transferToAddr,
-                    s.config.depositAmount)])
+                    s.config.depositAmount])])
                 , Storage.addOutcome(outcome, s)
             ];
         }});
