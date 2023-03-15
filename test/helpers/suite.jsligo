@@ -13,8 +13,10 @@
 // the given [amount_] of tokens.
 // Requires appropriate config of various periods and delays
 const createAndVoteProposal = (
-    [tok, dao, hash_, votes] : [Token_helper.originated,
-    DAO_helper.originated, option<bytes>, list<[int, nat, bool]>]
+    tok: Token_helper.originated, 
+    dao: DAO_helper.originated, 
+    hash_: option<bytes>, 
+    votes: list<[int, nat, bool]>
 ) : unit => {
     // set up the sender for propose and end_vote entry points
     const sender_ = List_helper.nth_exn(1)(tok.owners);

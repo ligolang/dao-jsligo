@@ -20,7 +20,7 @@ const bootstrap = () : [
     const config = { ...baseConfig,
         startDelay: 10 as nat, votingPeriod: 1800 as nat};
     const daoStorage = { ...baseStorage, config: config };
-    Bootstrap.boot(initTokAmount, daoStorage);
+    return Bootstrap.boot(initTokAmount, daoStorage);
 };
 
 // Successful end_vote with proposal accepted
