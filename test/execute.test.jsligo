@@ -60,10 +60,10 @@ const testSuccessParameterChanged = (() : unit => {
 
     DAO_helper.executeSuccess(1 as nat, packed, dao.contr);
     DAO_helper.assertExecuted(dao.taddr, 1 as nat);
-    const daoStorage = Test.get_storage (dao.taddr);
+    const daoStorageContr = Test.get_storage (dao.taddr);
 
     // Assert that the config has been updated
-    assert(daoStorage.config.quorumThreshold == (51 as nat));
+    assert(daoStorageContr.config.quorumThreshold == (51 as nat));
 })();
 
 // Successful execution of an operation list

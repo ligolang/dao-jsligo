@@ -176,7 +176,7 @@ const endVote = (s: storage) : result =>
 const main = (action: parameter, store: storage) : result => {
     assert_with_error(Tezos.get_amount() == (0 as tez), Errors.notZeroAmount);
     return match(action, {
-        Propose: (p: Propose.makeParams) => propose(p, store),
+        Propose: (p: Proposal.makeParams) => propose(p, store),
         Cancel: (nOpt: option<nat>) => cancel(nOpt, store),
         Lock: (n: nat) => lock(n, store),
         Release: (n: nat) => release(n, store),
