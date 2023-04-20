@@ -6,12 +6,12 @@
 // Boostrapping of the test environment,
 // initTokAmount is the amount of token allocated to every
 // bootstrapped accounts
-const boot = (initTokAmount: nat, initDAOStorage : DAO.storage)
+const boot = (initTokAmount: nat, initStorage : DAO.storage)
 : [Token_helper.originated, DAO_helper.originated, address] => {
     // Originate the token contract and the contract under test
     const tok = Token_helper.originate(initTokAmount);
     // Override governance token with test token
-    const initDAOStorage = { ...initDAOStorage, governanceToken: tok.addr };
+    const initDAOStorage = { ...initStorage, governanceToken: tok.addr };
     const dao = DAO_helper.originate(initDAOStorage);
 
     // Add the dao as operator for all the FA2 owner addresses
