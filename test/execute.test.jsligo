@@ -138,7 +138,7 @@ const testFailureTimelockDelayNotElapsed = (() : unit => {
 const testFailureTimelockRelocked = (() : unit => {
     const config = { ...baseConfig,
         startDelay: 10 as nat, votingPeriod: 360 as nat,
-        timelockDelay: 240 as nat};
+        timelockDelay: 10 as nat, timelockPeriod: 160 as nat};
 
     const daoStorage = { ...baseStorage, config: config };
     const [tok, dao, _] = bootstrap(daoStorage);
