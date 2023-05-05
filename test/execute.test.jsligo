@@ -23,7 +23,7 @@ const baseStorage = DAO_helper.baseStorage;
 // Successful timelock execution of an operation list
 const testSuccess = ((): unit => {
     const config = { ...baseConfig,
-        startDelay: 10 as nat, votingPeriod: 1800 as nat  };
+        startDelay: 10 as nat, votingPeriod: 360 as nat  };
     const daoStorage = { ...baseStorage, config: config };
     const [tok, dao, _] = bootstrap(daoStorage);
 
@@ -44,7 +44,7 @@ const testSuccess = ((): unit => {
 // Successful execution of a parameter change
 const testSuccessParameterChanged = (() : unit => {
     const config = { ...baseConfig,
-        startDelay: 10 as nat, votingPeriod: 1800 as nat  };
+        startDelay: 10 as nat, votingPeriod: 360 as nat  };
     const daoStorage = { ...baseStorage, config: config };
     const [tok, dao, _] = bootstrap(daoStorage);
 
@@ -69,7 +69,7 @@ const testSuccessParameterChanged = (() : unit => {
 // Successful execution of an operation list
 const testSuccessOperationList = (() : unit => {
     const config = { ...baseConfig,
-        startDelay: 10 as nat, votingPeriod: 1800 as nat  };
+        startDelay: 10 as nat, votingPeriod: 360 as nat  };
     const daoStorage = { ...baseStorage, config: config };
     const [tok, dao, _] = bootstrap(daoStorage);
 
@@ -119,7 +119,7 @@ const testFailureNoOutcome = (() : unit => {
 // Failing because timelock delay not elapsed
 const testFailureTimelockDelayNotElapsed = (() : unit => {
     const config = { ...baseConfig,
-        startDelay: 10 as nat, votingPeriod: 1800 as nat,
+        startDelay: 10 as nat, votingPeriod: 360 as nat,
         timelockDelay: 1800 as nat};
     const daoStorage = { ...baseStorage, config: config };
     const [tok, dao, _] = bootstrap(daoStorage);
@@ -137,8 +137,8 @@ const testFailureTimelockDelayNotElapsed = (() : unit => {
 // Failing because timelock has been relocked
 const testFailureTimelockRelocked = (() : unit => {
     const config = { ...baseConfig,
-        startDelay: 10 as nat, votingPeriod: 1800 as nat,
-        timelockDelay: 10 as nat};
+        startDelay: 10 as nat, votingPeriod: 360 as nat,
+        timelockDelay: 240 as nat};
 
     const daoStorage = { ...baseStorage, config: config };
     const [tok, dao, _] = bootstrap(daoStorage);
@@ -156,7 +156,7 @@ const testFailureTimelockRelocked = (() : unit => {
 // Failing because the packed data is not matching expected type
 const testFailureUnpackMismatch = (() : unit => {
     const config = { ...baseConfig,
-        startDelay: 10 as nat, votingPeriod: 1800 as nat };
+        startDelay: 10 as nat, votingPeriod: 360 as nat };
 
     const daoStorage = { ...baseStorage, config: config };
     const [tok, dao, _] = bootstrap(daoStorage);
@@ -175,7 +175,7 @@ const testFailureUnpackMismatch = (() : unit => {
 // Failing because the hash doesn't match the packed bytes
 const testFailureHashNotMatch = (() : unit => {
     const config = { ...baseConfig,
-        startDelay: 10 as nat, votingPeriod: 1800 as nat };
+        startDelay: 10 as nat, votingPeriod: 360 as nat };
 
     const daoStorage = { ...baseStorage, config: config };
     const [tok, dao, _] = bootstrap(daoStorage);

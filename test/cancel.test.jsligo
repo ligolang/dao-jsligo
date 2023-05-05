@@ -40,7 +40,7 @@ const testSuccessCurrentProposal = (() : unit => {
 const testSuccessAcceptedProposal = (() : unit => {
     const config = { ...baseConfig,
         startDelay: 10 as nat,
-        votingPeriod: 1800 as nat,
+        votingPeriod: 360 as nat,
         timelockDelay: 3000 as nat };
     const daoStorage = { ...baseStorage, config: config };
     const [tok, dao, _] = bootstrap(daoStorage);
@@ -88,7 +88,7 @@ const testFailureNotCreator = (() : unit => {
 // Failing cancel proposal because timelock is unlocked
 const testFailureTimelockUnlocked = (() : unit => {
     const config = { ...baseConfig,
-        startDelay: 10 as nat, votingPeriod: 1800 as nat  };
+        startDelay: 10 as nat, votingPeriod: 360 as nat  };
     const daoStorage = { ...baseStorage, config: config };
     const [tok, dao, _] = bootstrap(daoStorage);
 
@@ -106,7 +106,7 @@ const testFailureTimelockUnlocked = (() : unit => {
 // Failing cancel proposal because it was already executed
 const testFailureAlreadyExecuted = (() : unit => {
     const config = { ...baseConfig,
-        startDelay: 10 as nat, votingPeriod: 1800 as nat  };
+        startDelay: 10 as nat, votingPeriod: 360 as nat  };
     const daoStorage = { ...baseStorage, config: config };
     const [tok, dao, _] = bootstrap(daoStorage);
 
