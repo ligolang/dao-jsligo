@@ -18,7 +18,7 @@ const bootstrap = () : [
     const baseConfig = DAO_helper.baseConfig;
     const baseStorage = DAO_helper.baseStorage;
     const config = { ...baseConfig,
-        startDelay: 10 as nat, votingPeriod: 1800 as nat};
+        startDelay: 10 as nat, votingPeriod: 360 as nat};
     const daoStorage = { ...baseStorage, config: config };
     return Bootstrap.boot(initTokAmount, daoStorage);
 };

@@ -34,7 +34,7 @@ const baseConfig : DAO.Storage.Config.t = {
     superMajority: 80 as nat,
     startDelay: 360 as nat,
     votingPeriod: 1440 as nat,
-    timelockDelay: 360 as nat,
+    timelockDelay: 180 as nat,
     timelockPeriod: 720 as nat,
     burnAddress: "tz1burnburnburnburnburnburnburjAYjjX" as address
 };
