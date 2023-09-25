@@ -54,7 +54,7 @@ const baseStorage : DAO.storage = {
 
 // Originate a DAO contract with given init_storage storage
 const originate = (init_storage: DAO.storage) : originated => {
-    const [taddr, _, _] = Test.originate (DAO.main, init_storage, 0 as tez);
+    const [taddr, _x, _y] = Test.originate (DAO.main, init_storage, 0 as tez);
     const contr = Test.to_contract (taddr);
     const addr = Tezos.address (contr);
     return { addr: addr, taddr: taddr, contr: contr };
@@ -126,10 +126,10 @@ const batchVote = (addr_lst: list<address>, choice: DAO.Vote.choice, contr: cont
 // Assert DAO contract at [taddr] has [owner] [amount_] of tokens locked
 const assertLocked = (taddr: taddr, owner: DAO.Storage.Vault.owner, amount_: nat) : unit => {
     const s = Test.get_storage(taddr);
-    match (Big_map.find_opt(owner, s.vault), {
-        Some: (tokens: nat) => assert(tokens == amount_),
-        None: () => Test.failwith("Big_map key should not be missing")
-    });
+    match (Big_map.find_opt(owner, s.vault)) {
+        when(Some(tokens)): assert(tokens == amount_);
+        when(None): Test.failwith("Big_map key should not be missing");
+    };
 };
 
 // Assert DAO contract at [taddr] have registered [voter] [choice] with [amount_] votes
@@ -137,34 +137,34 @@ const assertVoted = (taddr: taddr, voter: address, choice: bool, amount_: nat)
 : unit => {
     const s = Test.get_storage (taddr);
     const p = Option.unopt(s.proposal);
-    match (Map.find_opt(voter, p.votes), {
-        Some: (vote: DAO.Vote.t) => assert(vote[0] == choice && vote[1] == amount_),
-        None: () => Test.failwith("Map key should not be missing")
-    });
+    match (Map.find_opt(voter, p.votes)) {
+        when(Some(vote)): assert(vote[0] == choice && vote[1] == amount_);
+        when(None): Test.failwith("Map key should not be missing");
+    };
 };
 
 // Assert DAO contract at [taddr] have an outcome occuring for [n] key in Executed state
 const assertExecuted = (taddr: taddr, n: nat) : unit => {
     const s = Test.get_storage (taddr);
-    match (Big_map.find_opt(n, s.outcomes), {
-        None: () => Test.failwith("The outcome should exists"),
-        Some: (o: Outcome.t) => {
-            const [_, state] = o;
-            assert(state == (Executed() as Outcome.state))
-        }
-    });
+    match (Big_map.find_opt(n, s.outcomes)) {
+        when(None): Test.failwith("The outcome should exists");
+        when(Some(outcome)): do {
+            const [_, state] = outcome;
+            assert(state == (Executed() as Outcome.state));
+        };
+    };
 };
 
 // Assert outcomes [bm] big map have an entry for key [k] and has given [s] state
 const assertProposalState =
     (bm: DAO.Storage.outcomes, k: nat, s: DAO.Outcome.state) : unit =>
-    match(Big_map.find_opt(k, bm), {
-        Some: (outcome: DAO.Outcome.t) => {
+    match(Big_map.find_opt(k, bm)) {
+        when(Some(outcome)): do {
             const [proposal, state] = outcome;
             // just checking timelock existence
             const _checkTimelock = proposal.timelock;
             // check that the proposal have been accepted
             assert(state == s)
-        },
-        None: () => Test.failwith("outcome not found")
-    });
+        };
+        when(None): Test.failwith("outcome not found");
+    };
