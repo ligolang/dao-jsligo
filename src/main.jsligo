@@ -51,7 +51,6 @@ const execute = (outcomeExecuteParam : Outcome.executeParams, s: storage) : resu
     };
 };
 
-/*
 @entry
 const propose = (p: Proposal.makeParams, s: storage) : result => {
     assert_with_error(Tezos.get_amount() == (0 as tez), Errors.notZeroAmount);
@@ -172,7 +171,7 @@ const vote = (choice: bool, s: storage) : result => {
 };
 
 @entry
-const endVote = (s: storage) : result => {
+const endVote = (_u : unit, s: storage) : result => {
     assert_with_error(Tezos.get_amount() == (0 as tez), Errors.notZeroAmount);
     return match(s.proposal) {
         when(None): failwith(Errors.noProposal);
@@ -206,4 +205,3 @@ const endVote = (s: storage) : result => {
         }
     }
 };
-*/
