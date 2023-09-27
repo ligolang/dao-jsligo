@@ -23,7 +23,10 @@ export type parameter =
 export type storage = Storage.t;
 type result = [list<operation>, storage];
 
-const execute = (outcomeKey: nat, packed: bytes, s: storage) : result => {
+@entry
+const execute = (outcomeExecuteParam : Outcome.executeParams, s: storage) : result => {
+    assert_with_error(Tezos.get_amount() == (0 as tez), Errors.notZeroAmount);
+    const {outcomeKey, packed} = outcomeExecuteParam;
     const proposal = match(Big_map.find_opt(outcomeKey, s.outcomes)) {
         when(None): failwith(Errors.outcomeNotFound);
         when(Some(outcome)): Outcome.getExecutableProposal(outcome)
@@ -48,7 +51,10 @@ const execute = (outcomeKey: nat, packed: bytes, s: storage) : result => {
     };
 };
 
-const propose = (p: Proposal.makeParams, s: storage) : result =>
+/*
+@entry
+const propose = (p: Proposal.makeParams, s: storage) : result => {
+    assert_with_error(Tezos.get_amount() == (0 as tez), Errors.notZeroAmount);
     match(s.proposal) {
         when(Some(_proposal)): failwith(Errors.proposalAlreadyExists);
         when(None): [
@@ -61,17 +67,22 @@ const propose = (p: Proposal.makeParams, s: storage) : result =>
                 Proposal.make(p, s.config.startDelay, s.config.votingPeriod),
                 s)
         ]
-    };
+    }
+};
 
-const cancel = (outcomeKeyOpt: option<nat>, s: storage) : result =>
-   [
-       list([Token.transfer(
-            [s.governanceToken,
-             Tezos.get_self_address(),
-             s.config.burnAddress,
-             s.config.depositAmount])
-       ]),
-       match(outcomeKeyOpt) {
+@entry
+const cancel = (outcomeKeyOpt: option<nat>, s: storage) : result => {
+    assert_with_error(Tezos.get_amount() == (0 as tez), Errors.notZeroAmount);
+    return [
+        list([
+            Token.transfer([
+                s.governanceToken,
+                Tezos.get_self_address(),
+                s.config.burnAddress,
+                s.config.depositAmount
+            ])
+        ]),
+        match(outcomeKeyOpt) {
             when(None):
                 match(s.proposal) {
                     when(None): failwith(Errors.nothingToCancel);
@@ -104,9 +115,12 @@ const cancel = (outcomeKeyOpt: option<nat>, s: storage) : result =>
                     }
                 }
         }
-   ];
+   ]
+};
 
+@entry
 const lock = (amount_: nat, s: storage) : result => {
+    assert_with_error(Tezos.get_amount() == (0 as tez), Errors.notZeroAmount);
     Proposal._checkNoVoteOngoing(s.proposal);
     const currentAmount = Vault.getForUser([s.vault, Tezos.get_sender()]);
 
@@ -122,7 +136,9 @@ const lock = (amount_: nat, s: storage) : result => {
     ];
 };
 
+@entry
 const release = (amount_: nat, s: storage) : result => {
+    assert_with_error(Tezos.get_amount() == (0 as tez), Errors.notZeroAmount);
     Proposal._checkNoVoteOngoing(s.proposal);
     const currentAmount = Vault.getForUserExn([s.vault, Tezos.get_sender()]);
     assert_with_error( (currentAmount >= amount_), Errors.notEnoughBalance);
@@ -139,18 +155,26 @@ const release = (amount_: nat, s: storage) : result => {
     ];
 };
 
-const vote = (choice: bool, s: storage) : storage =>
-    match(s.proposal) {
-        when(None): failwith(Errors.noProposal);
-        when(Some(proposal)): do {
-            Proposal._checkIsVotingPeriod(proposal);
-            const amount_ = Vault.getForUserExn([s.vault, Tezos.get_sender()]);
-            return Storage.updateVotes(proposal, [choice, amount_], s);
+@entry
+const vote = (choice: bool, s: storage) : result => {
+    assert_with_error(Tezos.get_amount() == (0 as tez), Errors.notZeroAmount);
+    return [
+        Constants.noOperation,
+        match(s.proposal) {
+            when(None): failwith(Errors.noProposal);
+            when(Some(proposal)): do {
+                Proposal._checkIsVotingPeriod(proposal);
+                const amount_ = Vault.getForUserExn([s.vault, Tezos.get_sender()]);
+                return Storage.updateVotes(proposal, [choice, amount_], s);
+            }
         }
-    };
+    ]
+};
 
-const endVote = (s: storage) : result =>
-    match(s.proposal) {
+@entry
+const endVote = (s: storage) : result => {
+    assert_with_error(Tezos.get_amount() == (0 as tez), Errors.notZeroAmount);
+    return match(s.proposal) {
         when(None): failwith(Errors.noProposal);
         when(Some(proposal)): do {
             Proposal._checkVotingPeriodEnded(proposal);
@@ -180,18 +204,6 @@ const endVote = (s: storage) : result =>
                 , Storage.addOutcome(outcome, s)
             ];
         }
-    };
-
-@entry
-const main = (action: parameter, store: storage) : result => {
-    assert_with_error(Tezos.get_amount() == (0 as tez), Errors.notZeroAmount);
-    return match(action) {
-        when(Propose(proposalMakeParams)): propose(proposalMakeParams, store);
-        when(Cancel(nOpt)): cancel(nOpt, store);
-        when(Lock(n)): lock(n, store);
-        when(Release(n)): release(n, store);
-        when(Execute(outcomeExecuteParam)): execute(outcomeExecuteParam.outcomeKey, outcomeExecuteParam.packed, store);
-        when(Vote(voteChoice)): [Constants.noOperation, vote(voteChoice, store)];
-        when(EndVote): endVote(store);
-    };
+    }
 };
+*/
