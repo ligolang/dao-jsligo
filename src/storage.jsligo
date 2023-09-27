@@ -22,25 +22,25 @@ export type t =
         nextOutcomeId: nat
     }
 
-const createProposal = (p: Proposal.t, s: t) : t =>
+export const createProposal = (p: Proposal.t, s: t) : t =>
     ({ ...s, proposal: Some(p) })
 
-const updateConfig = (f: Lambda.parameterChange, s: t) : t =>
+export const updateConfig = (f: Lambda.parameterChange, s: t) : t =>
     ({ ...s, config: f() })
 
-const updateVault = (v: Vault.t, s: t) : t =>
+export const updateVault = (v: Vault.t, s: t) : t =>
     ({ ...s, vault: v })
 
-const updateVotes = (p: Proposal.t, v: Vote.t, s: t) : t => {
+export const updateVotes = (p: Proposal.t, v: Vote.t, s: t) : t => {
     const newVotes = Map.update(Tezos.get_sender(), Some(v), p.votes);
     const newProposal = { ...p, votes: newVotes };
     return { ...s, proposal: Some(newProposal) }
 }
 
-const updateOutcome = (k: nat, o: Outcome.t, s: t) : t =>
+export const updateOutcome = (k: nat, o: Outcome.t, s: t) : t =>
     ({ ...s, outcomes: Big_map.update(k, Some(o), s.outcomes) })
 
-const addOutcome = (o: Outcome.t, s: t) : t => {
+export const addOutcome = (o: Outcome.t, s: t) : t => {
     let [proposal, status] = o;
 
     // If proposal is accepted, also create timelock

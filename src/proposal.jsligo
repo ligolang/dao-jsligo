@@ -21,7 +21,7 @@ export type makeParams =
         hash: option<bytes>
     }
 
-const make = (p: makeParams, startDelay: nat, votingPeriod: nat) : t => {
+export const make = (p: makeParams, startDelay: nat, votingPeriod: nat) : t => {
     const startAt = Tezos.get_now() + int(startDelay);
 
     return {
@@ -38,17 +38,17 @@ const make = (p: makeParams, startDelay: nat, votingPeriod: nat) : t => {
 const isVotingPeriod = (p: t) : bool =>
     ((Tezos.get_now() >= p.startAt) && (Tezos.get_now() < p.endAt));
 
-const _checkNotVotingPeriod = (p: t) : unit =>
+export const _checkNotVotingPeriod = (p: t) : unit =>
     assert_with_error(!isVotingPeriod(p), Errors.votingPeriod);
 
-const _checkIsVotingPeriod = (p: t) : unit =>
+export const _checkIsVotingPeriod = (p: t) : unit =>
     assert_with_error(isVotingPeriod(p), Errors.notVotingPeriod);
 
-const _checkNoVoteOngoing = (p_opt: option<t>) : unit =>
-    match(p_opt, {
-        Some: (p: t) => _checkNotVotingPeriod(p),
-        None: () => unit
-    });
+export const _checkNoVoteOngoing = (p_opt: option<t>) : unit =>
+    match(p_opt) {
+        when(Some(p)): _checkNotVotingPeriod(p);
+        when(None): unit;
+    };
 
-const _checkVotingPeriodEnded = (p: t) : unit =>
+export const _checkVotingPeriodEnded = (p: t) : unit =>
     assert_with_error(Tezos.get_now() > p.endAt, Errors.votingPeriod);
