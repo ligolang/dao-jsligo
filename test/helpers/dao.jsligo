@@ -5,8 +5,8 @@ import Lambda = DAO.Lambda;
 import Outcome = DAO.Outcome;
 
 // Some types for readability
-type taddr = typed_address<DAO.parameter, DAO.storage>;
-type contr = contract<DAO.parameter>;
+type taddr = typed_address<parameter_of DAO, DAO.storage>;
+type contr = contract<parameter_of DAO>;
 export type originated = {
     addr: address,
     taddr: taddr,
@@ -54,14 +54,14 @@ const baseStorage : DAO.storage = {
 
 // Originate a DAO contract with given init_storage storage
 const originate = (init_storage: DAO.storage) : originated => {
-    const [taddr, _x, _y] = Test.originate (DAO.main, init_storage, 0 as tez);
+    const [taddr, _x, _y] = Test.originate_module (contract_of(DAO), init_storage, 0 as tez);
     const contr = Test.to_contract (taddr);
     const addr = Tezos.address (contr);
     return { addr: addr, taddr: taddr, contr: contr };
 };
 
 // Call entry point of DAO contr contract
-const call = (p: DAO.parameter, contr: contr): test_exec_result =>
+const call = (p: parameter_of DAO, contr: contr): test_exec_result =>
     Test.transfer_to_contract (contr, p, 0 as tez);
 
 // Entry points call helpers

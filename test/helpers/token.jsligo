@@ -2,6 +2,7 @@
 #import "@ligo/fa/test/fa2/single_asset.test.mligo" "SingleAsset_helper"
 #import "./assert.jsligo" "Assert"
 #import "../../src/main.jsligo" "DAO"
+#import "../bootstrap/single_asset.mligo" "BootstrapSingleAsset"
 
 // Some types for readability
 type taddr = typed_address<SingleAsset.parameter, SingleAsset.storage>;
@@ -15,14 +16,13 @@ export type originated = {
 };
 
 const originate = (tok_amount : nat) : originated => {
-    const f = "../bootstrap/single_asset.mligo";
     const [init_storage, owners, ops] = SingleAsset_helper.get_initial_storage(
         [tok_amount, tok_amount, tok_amount]
     );
     const v_mich = Test.run(((x:SingleAsset.Storage.t) => x), init_storage);
-    const [addr, _x, _y] = Test.originate_from_file(f, "main", list(["total_supply"]), v_mich, 0 as tez);
-    const taddr : taddr = Test.cast_address (addr);
+    const [taddr, _x, _y] = Test.originate_module(contract_of(BootstrapSingleAsset), v_mich, 0 as tez);
     const contr = Test.to_contract (taddr);
+    const addr = Tezos.address (contr);
     return {
         addr: addr,
         taddr: taddr,
