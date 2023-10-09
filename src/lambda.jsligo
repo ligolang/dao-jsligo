@@ -8,19 +8,19 @@ export type t =
     | ["ParameterChange", parameterChange]
     | ["OperationList", operationList];
 
-const unpack = (hashOpt: option<bytes>, packed: bytes): t => {
-    return match(hashOpt, {
-        None: () => failwith(Errors.hashNotFound),
-        Some: (hash_: bytes) => {
+export const unpack = (hashOpt: option<bytes>, packed: bytes): t => {
+    return match(hashOpt) {
+        when(None()) : failwith(Errors.hashNotFound);
+        when(Some(hash_)) : do {
             assert_with_error(
                 hash_ == Crypto.sha256(packed),
                 Errors.hashNotMatch
             );
 
-            return match((Bytes.unpack(packed) as option<t>), {
-                None: () => failwith(Errors.unpackMismatch),
-                Some: (lambda_: t) => lambda_
-            });
-        }
-    });
+            return match((Bytes.unpack(packed) as option<t>)) {
+                when(None()) : failwith(Errors.unpackMismatch);
+                when(Some(lambda_)) : lambda_;
+            };
+        };
+    };
 };

@@ -22,7 +22,7 @@ export type executeParams =
         // ^ the packed Lambda.t
     }
 
-const makeState = (
+export const makeState = (
     [total, for_, against]: [nat, nat, nat],
     totalSupply: nat,
     refundThreshold: nat,
@@ -41,7 +41,7 @@ const makeState = (
     }
 }
 
-const make = (p: Proposal.t,
+export const make = (p: Proposal.t,
     totalSupply: nat,
     refundThreshold: nat,
     quorumThreshold: nat,
@@ -57,7 +57,7 @@ const make = (p: Proposal.t,
     )
 ];
 
-const getExecutableProposal = (outcome: t) : Proposal.t => {
+export const getExecutableProposal = (outcome: t) : Proposal.t => {
     const [p, state] = outcome;
 
     if ((Accepted() as state) == state) {

@@ -4,15 +4,15 @@
 export type t = address;
 export type fa2TransferContract = contract<FA2.transfer>;
 
-const getTransferEntrypoint = (addr: address) : fa2TransferContract => {
+export const getTransferEntrypoint = (addr: address) : fa2TransferContract => {
     const transferOption: option<fa2TransferContract> = Tezos.get_entrypoint_opt("%transfer", addr);
-    return match(transferOption, {
-        None: () => failwith(Errors.receiverNotFound),
-        Some: (c: fa2TransferContract) => c
-    });
+    return match(transferOption) {
+        when(None()) : failwith(Errors.receiverNotFound);
+        when(Some(c)) : c;
+    };
 };
 
-const transfer = ([token_addr, from_, to_, amount_]: [t, address, address, nat]) : operation => {
+export const transfer = ([token_addr, from_, to_, amount_]: [t, address, address, nat]) : operation => {
     const dest = getTransferEntrypoint(token_addr);
     const transfer_requests : FA2.transfer = list([
       {from_: from_, txs: list([{to_: to_, amount: amount_, token_id: 0 as nat}])}
@@ -21,5 +21,5 @@ const transfer = ([token_addr, from_, to_, amount_]: [t, address, address, nat])
     return Tezos.transaction(transfer_requests, (0 as tez), dest)
 };
 
-const getTotalSupply = (token_addr: t) : option<nat> =>
+export const getTotalSupply = (token_addr: t) : option<nat> =>
     Tezos.call_view("total_supply", unit, token_addr)
