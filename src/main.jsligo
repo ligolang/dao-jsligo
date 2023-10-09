@@ -35,24 +35,25 @@ export const execute = (p: parameter, s: storage) : result => {
                 [proposal, Executed()],
                 Storage.updateConfig(f,s)
             )]};
-    return [(list([])), ret_val];
+    return ret_val;
 };
 
 @entry
 export const propose = (p: Proposal.makeParams, s: storage) : result => {
-    const ret_val = match(lambda_) {
-            when(OperationList(f)) : [
-                f(),
-                Storage.updateOutcome(outcomeKey, [proposal, Executed()], s)
+    const ret_val = match(s.proposal) {
+            when (Some(_)) : failwith(Errors.proposalAlreadyExists);
+            when (None()) : [
+                list([Token.transfer(
+                    [s.governanceToken,
+                    Tezos.get_sender(),
+                    Tezos.get_self_address(),
+                    s.config.depositAmount]
+                )]), Storage.createProposal(
+                    Proposal.make(p, s.config.startDelay, s.config.votingPeriod),
+                    s)
             ];
-            when(ParameterChange(f)) : [
-                Constants.noOperation,
-                Storage.updateOutcome(
-                    outcomeKey,
-                    [proposal, Executed()],
-                    Storage.updateConfig(f,s)
-                )]};
-    return [list([]), ret_val];
+        };
+    return ret_val;
 }
 
 @entry
@@ -176,5 +177,5 @@ export const endVote = (_ : unit, s: storage) : result => {
                 ];
             }};
     
-    return [(list([])), ret_val];
+    return ret_val;
 };
