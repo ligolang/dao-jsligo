@@ -14,7 +14,7 @@ type result = [list<operation>, storage];
 type parameter = [nat, bytes]
 
 @entry
-const execute = (p: parameter, s: storage) : result => {
+export const execute = (p: parameter, s: storage) : result => {
     const [outcomeKey, packed] = p;
     const proposal = match(Big_map.find_opt(outcomeKey, s.outcomes)) {
         when(None()) : failwith(Errors.outcomeNotFound);
@@ -23,8 +23,7 @@ const execute = (p: parameter, s: storage) : result => {
 
     Timelock._checkUnlocked(proposal.timelock);
     const lambda_ : Lambda.t = Lambda.unpack(proposal.hash, packed);
-
-    return match(lambda_) {
+    const ret_val = match(lambda_) {
         when(OperationList(f)) : [
             f(),
             Storage.updateOutcome(outcomeKey, [proposal, Executed()], s)
@@ -35,29 +34,30 @@ const execute = (p: parameter, s: storage) : result => {
                 outcomeKey,
                 [proposal, Executed()],
                 Storage.updateConfig(f,s)
-            )]
-    };
+            )]};
+    return [(list([])), ret_val];
 };
 
 @entry
-const propose = (p: Proposal.makeParams, s: storage) : result =>
-    match(s.proposal) {
-        when(Some(_)) : failwith(Errors.proposalAlreadyExists);
-        when(None()) : [
-            list([Token.transfer(
-                [s.governanceToken,
-                Tezos.get_sender(),
-                Tezos.get_self_address(),
-                s.config.depositAmount]
-            )]), Storage.createProposal(
-                Proposal.make(p, s.config.startDelay, s.config.votingPeriod),
-                s)
-        ]
-    };
+export const propose = (p: Proposal.makeParams, s: storage) : result => {
+    const ret_val = match(lambda_) {
+            when(OperationList(f)) : [
+                f(),
+                Storage.updateOutcome(outcomeKey, [proposal, Executed()], s)
+            ];
+            when(ParameterChange(f)) : [
+                Constants.noOperation,
+                Storage.updateOutcome(
+                    outcomeKey,
+                    [proposal, Executed()],
+                    Storage.updateConfig(f,s)
+                )]};
+    return [list([]), ret_val];
+}
 
 @entry
-const cancel = (outcomeKeyOpt: option<nat>, s: storage) : result =>
-   [list([Token.transfer(
+export const cancel = (outcomeKeyOpt: option<nat>, s: storage) : result => {
+   return [list([Token.transfer(
         [s.governanceToken,
         Tezos.get_self_address(),
         s.config.burnAddress,
@@ -92,13 +92,15 @@ const cancel = (outcomeKeyOpt: option<nat>, s: storage) : result =>
             }};
         }
    ];
+};
 
 @entry
-const lock = (amount_: nat, s: storage) : result => {
+export const lock = (amount_: nat, s: storage) : result => {
     Proposal._checkNoVoteOngoing(s.proposal);
     const currentAmount = Vault.getForUser([s.vault, Tezos.get_sender()]);
 
-    return [
+    return 
+    [
         list([Token.transfer(
             [s.governanceToken,
             Tezos.get_sender(),
@@ -111,7 +113,7 @@ const lock = (amount_: nat, s: storage) : result => {
 };
 
 @entry
-const release = (amount_: nat, s: storage) : result => {
+export const release = (amount_: nat, s: storage) : result => {
     Proposal._checkNoVoteOngoing(s.proposal);
     const currentAmount = Vault.getForUserExn([s.vault, Tezos.get_sender()]);
     assert_with_error( (currentAmount >= amount_), Errors.notEnoughBalance);
@@ -129,45 +131,50 @@ const release = (amount_: nat, s: storage) : result => {
 };
 
 @entry
-const vote = (choice: bool, s: storage) : storage =>
-    match(s.proposal) {
-        when(None()) : failwith(Errors.noProposal);
-        when(Some(p)) : do {
-            Proposal._checkIsVotingPeriod(p);
-            const amount_ = Vault.getForUserExn([s.vault, Tezos.get_sender()]);
-            return Storage.updateVotes(p, [choice, amount_], s);
-        }};
+export const vote = (choice: bool, s: storage) : result => {
+    const ret_val = match(s.proposal) {
+            when(None()) : failwith(Errors.noProposal);
+            when(Some(p)) : do {
+                Proposal._checkIsVotingPeriod(p);
+                const amount_ = Vault.getForUserExn([s.vault, Tezos.get_sender()]);
+                return Storage.updateVotes(p, [choice, amount_], s);
+            }};
+    return [(list([])), ret_val];
+}
 
 @entry
-const endVote = (_ : unit, s: storage) : result =>
-    match(s.proposal) {
-        when(None()) : failwith(Errors.noProposal);
-        when(Some(p)) : do {
-            Proposal._checkVotingPeriodEnded(p);
-            const totalSupply = 
-                match(Token.getTotalSupply(s.governanceToken)) {
-                when (None()) : failwith(Errors.fa2TotalSupplyNotFound);
-                when (Some(n)) : n;
-            };
-            const outcome = Outcome.make(
-                    p,
-                    totalSupply,
-                    s.config.refundThreshold,
-                    s.config.quorumThreshold,
-                    s.config.superMajority
-                );
-            const [_, state] = outcome;
+export const endVote = (_ : unit, s: storage) : result => {
+    const ret_val = match(s.proposal) {
+            when(None()) : failwith(Errors.noProposal);
+            when(Some(p)) : do {
+                Proposal._checkVotingPeriodEnded(p);
+                const totalSupply = 
+                    match(Token.getTotalSupply(s.governanceToken)) {
+                    when (None()) : failwith(Errors.fa2TotalSupplyNotFound);
+                    when (Some(n)) : n;
+                };
+                const outcome = Outcome.make(
+                        p,
+                        totalSupply,
+                        s.config.refundThreshold,
+                        s.config.quorumThreshold,
+                        s.config.superMajority
+                    );
+                const [_, state] = outcome;
 
-            let transferToAddr = p.creator;
-            if (Rejected_(WithoutRefund()) == state) {
-                transferToAddr = s.config.burnAddress;
-            }
-            return [
-                list([Token.transfer(
-                    [s.governanceToken,
-                    Tezos.get_self_address(),
-                    transferToAddr,
-                    s.config.depositAmount])])
-                , Storage.addOutcome(outcome, s)
-            ];
-        }};
+                let transferToAddr = p.creator;
+                if (Rejected_(WithoutRefund()) == state) {
+                    transferToAddr = s.config.burnAddress;
+                }
+                return [
+                    list([Token.transfer(
+                        [s.governanceToken,
+                        Tezos.get_self_address(),
+                        transferToAddr,
+                        s.config.depositAmount])])
+                    , Storage.addOutcome(outcome, s)
+                ];
+            }};
+    
+    return [(list([])), ret_val];
+};
