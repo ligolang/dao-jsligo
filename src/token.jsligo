@@ -1,8 +1,9 @@
-#import "@ligo/fa/lib/fa2/asset/single_asset.mligo" "FA2"
+#import "@ligo/fa/lib/fa2/asset/single_asset.impl.mligo" "FA2"
+#import "@ligo/fa/lib/fa2/common/tzip12.datatypes.jsligo" "TZIP12"
 #import "./errors.jsligo" "Errors"
 
 export type t = address;
-export type fa2TransferContract = contract<FA2.transfer>;
+export type fa2TransferContract = contract<TZIP12.transfer>;
 
 export const getTransferEntrypoint = (addr: address) : fa2TransferContract => {
     const transferOption: option<fa2TransferContract> = Tezos.get_entrypoint_opt("%transfer", addr);
@@ -14,7 +15,7 @@ export const getTransferEntrypoint = (addr: address) : fa2TransferContract => {
 
 export const transfer = ([token_addr, from_, to_, amount_]: [t, address, address, nat]) : operation => {
     const dest = getTransferEntrypoint(token_addr);
-    const transfer_requests : FA2.transfer = list([
+    const transfer_requests : TZIP12.transfer = list([
       {from_: from_, txs: list([{to_: to_, amount: amount_, token_id: 0 as nat}])}
     ]);
 

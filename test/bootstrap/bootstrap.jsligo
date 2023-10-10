@@ -1,4 +1,5 @@
 #import "@ligo/fa/test/helpers/list.mligo" "List_helper"
+#import "@ligo/fa/lib/fa2/asset/single_asset.impl.mligo" "SingleAsset"
 #import "../helpers/token.jsligo" "Token_helper"
 #import "../helpers/dao.jsligo" "DAO_helper"
 #import "../../src/main.jsligo" "DAO"
@@ -6,8 +7,8 @@
 // Boostrapping of the test environment,
 // initTokAmount is the amount of token allocated to every
 // bootstrapped accounts
-const boot = (initTokAmount: nat, initStorage : DAO.storage)
-: [Token_helper.originated, DAO_helper.originated, address] => {
+
+const boot = (initTokAmount: nat, initStorage : DAO.storage) => {
     // Originate the token contract and the contract under test
     const tok = Token_helper.originate(initTokAmount);
     // Override governance token with test token

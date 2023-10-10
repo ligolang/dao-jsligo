@@ -10,8 +10,8 @@
 #import "./timelock.jsligo" "Timelock"
 
 export type storage = Storage.t;
-type result = [list<operation>, storage];
-type parameter = [nat, bytes]
+export type result = [list<operation>, storage];
+export type parameter = [nat, bytes]
 
 @entry
 export const execute = (p: parameter, s: storage) : result => {

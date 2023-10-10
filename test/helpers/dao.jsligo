@@ -9,8 +9,7 @@ type taddr = typed_address<DAO.parameter, DAO.storage>;
 type contr = contract<DAO.parameter>;
 export type originated = {
     addr: address,
-    taddr: taddr,
-    contr: contr,
+    taddr: taddr
 };
 
 // Some dummy values intended to be used as placeholders
@@ -53,72 +52,75 @@ const baseStorage : DAO.storage = {
 };
 
 // Originate a DAO contract with given init_storage storage
-const originate = (init_storage: DAO.storage) : originated => {
-    const [taddr, _, _] = Test.originate (DAO.main, init_storage, 0 as tez);
-    const contr = Test.to_contract (taddr);
-    const addr = Tezos.address (contr);
-    return { addr: addr, taddr: taddr, contr: contr };
+export const originate = (init_storage: DAO.storage) : originated => {
+    const orig = Test.originate_from_file ("../../src/main.jsligo", init_storage, 0 as tez);
+    const taddr = orig.addr;
+    const addr = Test.to_address (taddr);
+    return { addr: addr, taddr: taddr };
 };
 
 // Call entry point of DAO contr contract
-const call = (p: DAO.parameter, contr: contr): test_exec_result =>
-    Test.transfer_to_contract (contr, p, 0 as tez);
+const call = (p, taddr) : test_exec_result =>
+    Test.transfer (taddr, p, 0 as tez);
 
 // Entry points call helpers
-const cancel = (outcome_key_opt: option<nat>, contr: contr): test_exec_result =>
-    call(Cancel(outcome_key_opt), contr);
+const cancel = (outcome_key_opt: option<nat>, taddr): test_exec_result =>
+    call((Cancel(outcome_key_opt) as parameter_of DAO), taddr);
 
-const endVote = (contr: contr): test_exec_result => call(EndVote(), contr);
+const endVote = (taddr): test_exec_result => 
+    call(EndVote() as parameter_of DAO, taddr);
 
-const execute = (k: nat, packed: bytes, contr: contr): test_exec_result =>
-    call(Execute({ outcomeKey: k, packed: packed }), contr);
+const execute = (k: nat, packed: bytes, taddr): test_exec_result =>
+    call(Execute([k, packed]) as parameter_of DAO, taddr);
 
-const lock = (amount_: nat, contr: contr): test_exec_result => call(Lock(amount_), contr);
+const lock = (amount_: nat, taddr): test_exec_result => 
+    call(Lock(amount_) as parameter_of DAO, taddr);
 
-const propose = (proposal: DAO.Proposal.makeParams, contr: contr): test_exec_result =>
-    call(Propose(proposal), contr);
+const propose = (proposal: DAO.Proposal.makeParams, taddr): test_exec_result =>
+    call(Propose(proposal) as parameter_of DAO, taddr);
 
-const release = (amount_: nat, contr: contr): test_exec_result =>
-    call(Release(amount_), contr);
+const release = (amount_: nat, taddr): test_exec_result =>
+    call(Release(amount_) as parameter_of DAO, taddr);
 
-const vote = (choice: bool, contr: contr): test_exec_result => call(Vote(choice), contr);
+const vote = (choice: bool, taddr): test_exec_result => 
+    call(Vote(choice) as parameter_of DAO, taddr);
 
 // Asserter helper for successful entry point calls
-const cancelSuccess = (outcome_key_opt: option<nat>, contr: contr): unit =>
-    Assert.txSuccess(cancel(outcome_key_opt, contr));
+const cancelSuccess = (outcome_key_opt: option<nat>, taddr): unit =>
+    Assert.txSuccess(cancel(outcome_key_opt, taddr));
 
-const endVoteSuccess = (contr : contr): unit =>
-    Assert.txSuccess(endVote(contr));
+const endVoteSuccess = (taddr): unit =>
+    Assert.txSuccess(endVote(taddr));
 
-const executeSuccess = (k: nat, packed: bytes, contr: contr): unit =>
-    Assert.txSuccess(execute(k, packed, contr));
+const executeSuccess = (k: nat, packed: bytes, taddr): unit =>
+    Assert.txSuccess(execute(k, packed, taddr));
 
-const lockSuccess = (amount_: nat, contr: contr): unit =>
-    Assert.txSuccess (lock(amount_, contr));
+const lockSuccess = (amount_: nat, taddr): unit =>
+    Assert.txSuccess (lock(amount_, taddr));
 
-const proposeSuccess = (proposal: DAO.Proposal.makeParams, contr: contr): unit =>
-    Assert.txSuccess(propose(proposal, contr));
+const proposeSuccess = (proposal: DAO.Proposal.makeParams, taddr): unit =>
+    Assert.txSuccess(propose(proposal, taddr));
 
-const releaseSuccess = (amount_: nat, contr: contr): unit =>
-    Assert.txSuccess(release(amount_, contr));
+const releaseSuccess = (amount_: nat, taddr): unit =>
+    Assert.txSuccess(release(amount_, taddr));
 
-const voteSuccess = (choice: DAO.Vote.choice, contr: contr): unit =>
-    Assert.txSuccess(vote(choice, contr));
+const voteSuccess = (choice: DAO.Vote.choice, taddr): unit =>
+    Assert.txSuccess(vote(choice, taddr));
 
 // Batch call of lock entry point, WARNING: changes Test framework source
-const batchLock = (addr_lst: list<address>, amount_: nat, contr: contr) : unit => {
+const batchLock = (addr_lst: list<address>, amount_: nat, taddr) : unit => {
     const lock = (addr: address) : unit => {
         Test.set_source (addr);
-        lockSuccess(amount_, contr);
+        lockSuccess(amount_, taddr);
     };
     List.iter(lock, addr_lst);
 };
 
 // Batch call of vote entry point, WARNING: changes Test framework source
-const batchVote = (addr_lst: list<address>, choice: DAO.Vote.choice, contr: contr) : unit => {
+const batchVote = (addr_lst: list<address>, choice: DAO.Vote.choice, taddr) : unit => {
     const vote = (addr: address) : unit => {
         Test.set_source (addr);
-        voteSuccess(choice, contr);
+        voteSuccess(choice, taddr);
     };
     List.iter(vote, addr_lst);
 };
@@ -126,10 +128,10 @@ const batchVote = (addr_lst: list<address>, choice: DAO.Vote.choice, contr: cont
 // Assert DAO contract at [taddr] has [owner] [amount_] of tokens locked
 const assertLocked = (taddr: taddr, owner: DAO.Storage.Vault.owner, amount_: nat) : unit => {
     const s = Test.get_storage(taddr);
-    match (Big_map.find_opt(owner, s.vault), {
-        Some: (tokens: nat) => assert(tokens == amount_),
-        None: () => Test.failwith("Big_map key should not be missing")
-    });
+    match (Big_map.find_opt(owner, s.vault)) {
+        when (Some(tokens)) : assert(tokens == amount_);
+        when (None()) : Test.failwith("Big_map key should not be missing")
+    };
 };
 
 // Assert DAO contract at [taddr] have registered [voter] [choice] with [amount_] votes
@@ -137,34 +139,35 @@ const assertVoted = (taddr: taddr, voter: address, choice: bool, amount_: nat)
 : unit => {
     const s = Test.get_storage (taddr);
     const p = Option.unopt(s.proposal);
-    match (Map.find_opt(voter, p.votes), {
-        Some: (vote: DAO.Vote.t) => assert(vote[0] == choice && vote[1] == amount_),
-        None: () => Test.failwith("Map key should not be missing")
-    });
+    match (Map.find_opt(voter, p.votes)) {
+        when (Some(vote)) : assert(vote[0] == choice && vote[1] == amount_);
+        when (None()) : Test.failwith("Map key should not be missing");
+    };
 };
 
 // Assert DAO contract at [taddr] have an outcome occuring for [n] key in Executed state
 const assertExecuted = (taddr: taddr, n: nat) : unit => {
     const s = Test.get_storage (taddr);
-    match (Big_map.find_opt(n, s.outcomes), {
-        None: () => Test.failwith("The outcome should exists"),
-        Some: (o: Outcome.t) => {
+    match (Big_map.find_opt(n, s.outcomes)) {
+        when(None()) : Test.failwith("The outcome should exists");
+        when(Some(o)) : do {
             const [_, state] = o;
             assert(state == (Executed() as Outcome.state))
-        }
-    });
+        };
+    };
 };
 
 // Assert outcomes [bm] big map have an entry for key [k] and has given [s] state
 const assertProposalState =
-    (bm: DAO.Storage.outcomes, k: nat, s: DAO.Outcome.state) : unit =>
-    match(Big_map.find_opt(k, bm), {
-        Some: (outcome: DAO.Outcome.t) => {
+    (bm: DAO.Storage.outcomes, k: nat, s: DAO.Outcome.state) : unit => {
+    match(Big_map.find_opt(k, bm)) {
+        when (Some(outcome)) : do {
             const [proposal, state] = outcome;
             // just checking timelock existence
             const _checkTimelock = proposal.timelock;
             // check that the proposal have been accepted
             assert(state == s)
-        },
-        None: () => Test.failwith("outcome not found")
-    });
+        };
+        when (None()) : Test.failwith("outcome not found")
+    };
+};

@@ -1,5 +1,5 @@
 // Assert contract call results in failwith with given string
-const stringFailure = (res: test_exec_result,expected: string) : unit => {
+export const stringFailure = (res: test_exec_result,expected: string) : unit => {
   let expected_bis = Test.eval (expected) ;
   match (res) {
     when(Fail(x)) : (
@@ -13,7 +13,7 @@ const stringFailure = (res: test_exec_result,expected: string) : unit => {
 };
 
 // Assert contract result is successful
-const txSuccess = (res: test_exec_result) : unit =>
+export const txSuccess = (res: test_exec_result) : unit =>
   match (res) {
     when(Fail(_)) : Test.failwith("Transaction should not fail");
     when (Success(_)) : unit
