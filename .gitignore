@@ -4,6 +4,7 @@
 _ligo/
 ligo.esy.lock/
 _esy/
+ligo.json
 /compiled
 **/compiled
 /deploy/metadata.json
