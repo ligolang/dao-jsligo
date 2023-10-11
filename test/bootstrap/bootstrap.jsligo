@@ -17,12 +17,7 @@ const boot = (initTokAmount: nat, initStorage : DAO.storage) => {
 
     // Add the dao as operator for all the FA2 owner addresses
     //    TODO: ... in the real world, remove operator?
-    List.iter((owner: address) => {
-        Test.set_source(owner);
-        return Token_helper.add_operators(list([
-                { owner: owner, operator: dao.addr, token_id: (0 as nat) }
-            ]), tok.contr);
-        }, tok.owners);
+    Token_helper.add_operators(tok.owners, dao.addr, tok.taddr);
 
     // Set a token owner as sender in the Test framework
     const sender_ = List_helper.nth_exn(1)(tok.owners);
