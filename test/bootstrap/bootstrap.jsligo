@@ -21,7 +21,7 @@ const boot = (initTokAmount: nat, initStorage : DAO.storage) => {
         Test.set_source(owner);
         return Token_helper.add_operators(list([
                 { owner: owner, operator: dao.addr, token_id: (0 as nat) }
-            ]), tok.contr);
+            ]), tok.taddr);
         }, tok.owners);
 
     // Set a token owner as sender in the Test framework
