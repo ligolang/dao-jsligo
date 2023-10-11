@@ -56,34 +56,11 @@ type single_asset_transfer_param = {
 //     0 as nat
 // };
 // Batch add [operators] to [contr] contract
-
-const add_operators = (
-    owners: list<address>,
-    address: address,
-    contr: contract<SingleAsset.SingleAsset.storage>
-): unit => {
-    const add_operator = (
-        operators: SingleAsset.SingleAsset.operators,
-        owner: address,
-        addr: address
-    ) => {
-        Test.set_source(owner);
-        return SingleAsset.Sidecar.add_operator(operators, owner, addr)
-    };
-    const operators: big_map<address, set<address>> =
-        List.fold(
-            (operators: SingleAsset.SingleAsset.operators, owner: address): SingleAsset.
-            SingleAsset.
-            operators => { add_operator(operators, owner, address); },
-            owners,
-            Big_map.empty as SingleAsset.SingleAsset.operators
-        );
-    let r =
-        Test.transfer(
-            contr,
-            (Update_operators(add_operator) as list<TZIP12.update_operators>),
-            0 as tez
-        );
+const add_operators = (operators: list<SingleAsset.operator>, contr: contract<SingleAsset.parameter>) : unit => {
+    const f = ([ys, x] : [list<SingleAsset.unit_update>, SingleAsset.operator])
+    : list<SingleAsset.unit_update> => list([(Add_operator(x) as SingleAsset.unit_update), ...ys]);
+    const add_operator = List.fold_left (f, (list([]) as list<SingleAsset.unit_update>), operators);
+    let r = Test.transfer_to_contract(contr, (Update_operators(add_operator)), 0 as tez);
     Assert.txSuccess(r);
 };
 
