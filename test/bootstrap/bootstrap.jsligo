@@ -1,5 +1,5 @@
 #import "@ligo/fa/test/helpers/list.mligo" "List_helper"
-#import "@ligo/fa/lib/fa2/asset/single_asset.impl.mligo" "SingleAsset"
+#import "@ligo/fa/lib/fa2/asset/single_asset.impl.jsligo" "SingleAsset"
 #import "../helpers/token.jsligo" "Token_helper"
 #import "../helpers/dao.jsligo" "DAO_helper"
 #import "../../src/main.jsligo" "DAO"

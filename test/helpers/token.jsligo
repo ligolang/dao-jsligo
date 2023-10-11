@@ -2,8 +2,6 @@
 
 #import "@ligo/fa/test/fa2/single_asset_jsligo.test.mligo" "SingleAsset_helper"
 
-#import "@ligo/fa/lib/fa2/common/tzip12.datatypes.jsligo" "TZIP12"
-
 #import "./assert.jsligo" "Assert"
 
 #import "../../src/main.jsligo" "DAO"
@@ -56,8 +54,8 @@ type single_asset_transfer_param = {
 //     0 as nat
 // };
 // Batch add [operators] to [contr] contract
-const add_operators = (operators: list<SingleAsset.operator>, contr: contract<SingleAsset.parameter>) : unit => {
-    const f = ([ys, x] : [list<SingleAsset.unit_update>, SingleAsset.operator])
+const add_operators = (operators: list<SingleAsset.Datatypes.operator>) : unit => {
+    const f = ([ys, x] : [list<SingleAsset.TZIP12.unit_update>, SingleAsset.operator])
     : list<SingleAsset.unit_update> => list([(Add_operator(x) as SingleAsset.unit_update), ...ys]);
     const add_operator = List.fold_left (f, (list([]) as list<SingleAsset.unit_update>), operators);
     let r = Test.transfer_to_contract(contr, (Update_operators(add_operator)), 0 as tez);

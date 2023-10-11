@@ -1,12 +1,10 @@
 #import "@ligo/fa/lib/fa2/asset/single_asset.impl.jsligo" "FA2"
 
-#import "@ligo/fa/lib/fa2/common/tzip12.datatypes.jsligo" "TZIP12"
-
 #import "./errors.jsligo" "Errors"
 
 export type t = address;
 
-export type fa2TransferContract = contract<TZIP12.transfer>;
+export type fa2TransferContract = contract<FA2.TZIP12.transfer>;
 
 export const getTransferEntrypoint = (addr: address): fa2TransferContract => {
     const transferOption: option<fa2TransferContract> =
@@ -23,7 +21,7 @@ export const transfer = (
     [token_addr, from_, to_, amount_]: [t, address, address, nat]
 ): operation => {
     const dest = getTransferEntrypoint(token_addr);
-    const transfer_requests: TZIP12.transfer =
+    const transfer_requests: FA2.TZIP12.transfer =
         list(
             [
                 {
