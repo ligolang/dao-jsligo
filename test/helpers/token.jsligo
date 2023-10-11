@@ -1,10 +1,15 @@
-#import "@ligo/fa/lib/fa2/asset/single_asset.impl.mligo" "SingleAsset"
-#import "@ligo/fa/test/fa2/single_asset.test.mligo" "SingleAsset_helper"
+#import "@ligo/fa/lib/fa2/asset/single_asset.impl.jsligo" "SingleAsset"
+
+#import "@ligo/fa/test/fa2/single_asset_jsligo.test.mligo" "SingleAsset_helper"
+
 #import "@ligo/fa/lib/fa2/common/tzip12.datatypes.jsligo" "TZIP12"
+
 #import "./assert.jsligo" "Assert"
+
 #import "../../src/main.jsligo" "DAO"
 
 // Some types for readability
+
 export type originated<p, s> = {
     addr: address,
     taddr: typed_address<p, s>,
@@ -12,20 +17,21 @@ export type originated<p, s> = {
     ops: list<address>
 };
 
-export const originate = (tok_amount : nat) => {
+export const originate = (tok_amount: nat) => {
     const f = "../bootstrap/single_asset.mligo";
-    const [init_storage, owners, ops] = SingleAsset_helper.get_initial_storage(
-        [tok_amount, tok_amount, tok_amount]
-    );
-    const orig = Test.originate_from_file(f, init_storage, 0 as tez);
+    const [init_storage, owners, ops] =
+        SingleAsset_helper.get_initial_storage(
+            [tok_amount, tok_amount, tok_amount]
+        );
+    const orig =
+        Test.originate(
+            contract_of(SingleAsset.SingleAsset),
+            init_storage,
+            0mutez
+        );
     const taddr = orig.addr;
     const addr = Test.to_address(taddr);
-    return {
-        addr: addr,
-        taddr: taddr,
-        owners: owners,
-        ops: ops
-    };
+    return { addr: addr, taddr: taddr, owners: owners, ops: ops };
 };
 
 type single_asset_transfer_param = {
@@ -49,28 +55,41 @@ type single_asset_transfer_param = {
 //     let [ops, store] = Transfer([transfer_requests, s]) as parameter_of SingleAsset.SingleAsset;
 //     0 as nat
 // };
-
 // Batch add [operators] to [contr] contract
-const add_operators = (owners: list<address>, address : address, contr: contract<SingleAsset.storage) : unit => {
-    const add_operator = (operators, owner, addr) => {
+
+const add_operators = (
+    owners: list<address>,
+    address: address,
+    contr: contract<SingleAsset.SingleAsset.storage>
+): unit => {
+    const add_operator = (
+        operators: SingleAsset.SingleAsset.operators,
+        owner: address,
+        addr: address
+    ) => {
         Test.set_source(owner);
         return SingleAsset.Sidecar.add_operator(operators, owner, addr)
     };
-    const operators : big_map<address, set<address>> = List.fold(
-        (operators : SingleAsset.Datatypes.operators, owner: address) : SingleAsset.Datatypes.operators => {
-            add_operator(operators, owner, address);
-        }, 
-        owners, 
-        Big_map.empty
-    );
-    let r = Test.transfer(contr, (Update_operators(add_operator) as list<TZIP12.update_operators>), 0 as tez);
+    const operators: big_map<address, set<address>> =
+        List.fold(
+            (operators: SingleAsset.SingleAsset.operators, owner: address): SingleAsset.
+            SingleAsset.
+            operators => { add_operator(operators, owner, address); },
+            owners,
+            Big_map.empty as SingleAsset.SingleAsset.operators
+        );
+    let r =
+        Test.transfer(
+            contr,
+            (Update_operators(add_operator) as list<TZIP12.update_operators>),
+            0 as tez
+        );
     Assert.txSuccess(r);
 };
 
 // assert for FA2 insuffiscient balance string failure
 // const assertInsBalanceFailure = (r : test_exec_result) : unit =>
 //     Assert.stringFailure(r, SingleAsset.Errors.ins_balance);
-
 // assert FA2 contract at [taddr] have [owner] address with [amount_] tokens in its ledger
 // const assertBalanceAmount = (taddr, owner, amount_: nat) : unit => {
 //     const s = Test.get_storage (taddr);
@@ -79,7 +98,6 @@ const add_operators = (owners: list<address>, address : address, contr: contract
 //         when (None()) : Test.failwith("Big_map key should not be missing")
 //     };
 // };
-
 // get balance in [taddr] contract for [owner] address
 // const get_balance_for<p, s> = (taddr : typed_address<p, s>, owner) :
 // nat => {
@@ -89,7 +107,6 @@ const add_operators = (owners: list<address>, address : address, contr: contract
 //         when (None()) : 0 as nat
 //     };
 // };
-
 // Create a lambda of type (list<operation>) that would call the "transfer"
 // entrypoint of a FA2 contract residing at [addr], making a token transfer between
 // [from_] and [to_] addresses with [amount_] tokens.
@@ -97,7 +114,6 @@ const add_operators = (owners: list<address>, address : address, contr: contract
 // : DAO.Lambda.operationList => {
 //         const transferOpt: option<contract<SingleAsset.transfer>> =
 //             Tezos.get_entrypoint_opt("%transfer", addr);
-
 //         return match (transferOpt) {
 //             when (Some(c)) : do {
 //                 const transfer_requests: SingleAsset.transfer = list([
