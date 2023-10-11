@@ -51,7 +51,7 @@ type single_asset_transfer_param = {
 // };
 
 // Batch add [operators] to [contr] contract
-const add_operators = (owners: list<address>, address : address, contr: contract<SingleAsset.storage) : unit => {
+const add_operators = (owners: list<address>, address : address, taddr) : unit => {
     const add_operator = (operators, owner, addr) => {
         Test.set_source(owner);
         return SingleAsset.Sidecar.add_operator(operators, owner, addr)
@@ -63,7 +63,7 @@ const add_operators = (owners: list<address>, address : address, contr: contract
         owners, 
         Big_map.empty
     );
-    let r = Test.transfer(contr, (Update_operators(add_operator) as list<TZIP12.update_operators>), 0 as tez);
+    let r = Test.transfer(taddr, (Update_operators(add_operator) as list<TZIP12.update_operators>), 0 as tez);
     Assert.txSuccess(r);
 };
 
