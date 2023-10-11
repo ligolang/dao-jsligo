@@ -63,7 +63,7 @@ const add_operators = (owners: list<address>, address : address, taddr) : unit =
         owners, 
         Big_map.empty
     );
-    let r = Test.transfer(taddr, (Update_operators(add_operator) as list<TZIP12.update_operators>), 0 as tez);
+    let r = Test.transfer(taddr, (Update_operators(operators) as list<TZIP12.update_operators>), 0 as tez);
     Assert.txSuccess(r);
 };
 
