@@ -54,14 +54,50 @@ type single_asset_transfer_param = {
 //     0 as nat
 // };
 // Batch add [operators] to [contr] contract
-
 // Add_operator should consume : 
 // { owner: owner, operator: dao.addr, token_id: (0 as nat) }
-const add_operators = (operators: list<SingleAsset.Datatypes.operator>, token_address: list<SingleAsset.Datatypes.operator>) : unit => {
-    const f = ([operators, operator] : [list<SingleAsset.TZIP12.unit_update>, SingleAsset.Datatypes.operator])
-    : list<SingleAsset.TZIP12.unit_update> => list([(Add_operator(operator) as SingleAsset.TZIP12.unit_update), ...operators]);
-    const add_operator = List.fold_left (f, (list([]) as list<SingleAsset.TZIP12.unit_update>), operators);
-    let r = Test.transfer_to_contract(contr, (Update_operators(add_operator)), 0 as tez);
+
+export const add_operators = (
+    operators: list<SingleAsset.Datatypes.operator>,
+    token_address: typed_address<
+        parameter_of SingleAsset.SingleAsset,
+        SingleAsset.SingleAsset.storage
+    >,
+    daoAddress: address
+): unit => {
+    const f = (
+        [operators, operator]: [
+            list<SingleAsset.TZIP12.unit_update>,
+            SingleAsset.Datatypes.operator
+        ]
+    ): list<SingleAsset.TZIP12.unit_update> =>
+        list(
+            [
+                (
+                    Add_operator(
+                        {
+                            owner: operator,
+                            operator: daoAddress,
+                            token_id: 0 as nat
+                        }
+                    ) as SingleAsset.TZIP12.unit_update
+                ),
+                ...operators
+            ]
+        );
+    const add_operators =
+        List.fold_left(
+            f,
+            (list([]) as list<SingleAsset.TZIP12.unit_update>),
+            operators
+        );
+    const contr = Test.to_contract(token_address);
+    let r =
+        Test.transfer_to_contract(
+            contr,
+            (Update_operators(add_operators)),
+            0 as tez
+        );
     Assert.txSuccess(r);
 };
 
