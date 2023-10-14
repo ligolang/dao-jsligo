@@ -54,8 +54,7 @@ export const transfer = (
     const transfer_requests : SingleAsset.TZIP12.transfer = list([
       {from_: from_, txs: list([{to_:to_, amount: amount_, token_id: 0 as nat}])}
     ]);
-    const s = Test.get_storage(token_address);
-    return Test.transfer_exn (token_address, (Transfer(transfer_requests, s) as  parameter_of SingleAsset.TZIP12Interface.transfer), 0 as tez);
+    return Test.transfer_exn (token_address, (Transfer(transfer_requests) as  parameter_of SingleAsset.SingleAsset), 0 as tez);
 };
 
 // Batch add [operators] to [contr] contract
