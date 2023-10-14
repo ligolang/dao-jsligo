@@ -57,7 +57,7 @@ const testFailureInsufiscientBalance = (() : unit => {
 
     // Burn all the sender tokens
     const burn_addr = "tz1ZZZZZZZZZZZZZZZZZZZZZZZZZZZZNkiRg" as address;
-    const _ = Token_helper.transfer(tok.contr, sender_, burn_addr, initTokAmount);
+    const _ = Token_helper.transfer(tok.taddr, sender_, burn_addr, initTokAmount);
     const r = DAO_helper.propose(DAO_helper.dummyProposal, dao.contr);
 
     Token_helper.assertInsBalanceFailure(r);

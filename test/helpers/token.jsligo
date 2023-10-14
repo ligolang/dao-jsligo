@@ -41,22 +41,24 @@ type single_asset_transfer_param = {
 
 // Transfer token in [contr] between [from_] and [to_] addresses with [amount_] tokens,
 //  WARNING: changes Test framework source
-// const transfer = (s : DAO.storage, from_: address, to_: address, amount_: nat)
-// : nat => {
-//     Test.set_source (from_);
-//     const transfer_requests : TZIP12.transfer = list([
-//       {
-//         from_: from_, 
-//         txs: list([{to_:to_, amount: amount_, token_id: 0 as nat}])
-//       }
-//     ]);
-//     let [ops, store] = Transfer([transfer_requests, s]) as parameter_of SingleAsset.SingleAsset;
-//     0 as nat
-// };
-// Batch add [operators] to [contr] contract
-// Add_operator should consume : 
-// { owner: owner, operator: dao.addr, token_id: (0 as nat) }
+export const transfer = (
+    token_address: typed_address<
+        parameter_of SingleAsset.SingleAsset,
+        SingleAsset.SingleAsset.storage
+    >, 
+    from_: address, 
+    to_: address, 
+    amount_: nat 
+): nat => {
+    Test.set_source (from_);
+    const transfer_requests : SingleAsset.TZIP12.transfer = list([
+      {from_: from_, txs: list([{to_:to_, amount: amount_, token_id: 0 as nat}])}
+    ]);
+    const s = Test.get_storage(token_address);
+    return Test.transfer_exn (token_address, (Transfer(transfer_requests, s) as  parameter_of SingleAsset.TZIP12Interface.transfer), 0 as tez);
+};
 
+// Batch add [operators] to [contr] contract
 export const add_operators = (
     operators: list<SingleAsset.Datatypes.operator>,
     token_address: typed_address<
