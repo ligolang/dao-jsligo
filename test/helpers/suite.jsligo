@@ -13,7 +13,10 @@
 // the given [amount_] of tokens.
 // Requires appropriate config of various periods and delays
 const createAndVoteProposal = (
-    tok: Token_helper.originated, 
+    tok: Token_helper.originated<
+        parameter_of Token_helper.SingleAsset.SingleAsset,
+        Token_helper.SingleAsset.SingleAsset.storage
+    >, 
     dao: DAO_helper.originated, 
     hash_: option<bytes>, 
     votes: list<[int, nat, bool]>
