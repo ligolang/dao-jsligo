@@ -27,7 +27,7 @@ const createAndVoteProposal = (
     // impersonate token owners and call lock entry point
     const callLock = ([nthAccount, amount_, _] : [int, nat, bool]) : unit => {
         Test.set_source (List_helper.nth_exn(nthAccount)(tok.owners));
-        DAO_helper.lockSuccess(amount_, dao.contr);
+        DAO_helper.lockSuccess(amount_, dao.taddr as parameter_of DAO_helper.DAO);
     };
     List.iter (callLock, votes);
 

@@ -61,7 +61,7 @@ export const originate = (init_storage: DAO.storage) : originated => {
 
 // Call entry point of DAO contr contract
 const call = (p, taddr) : test_exec_result =>
-    Test.transfer (taddr, p, 0 as tez);
+    Test.transfer (taddr, p as parameter_of DAO, 0 as tez);
 
 // Entry points call helpers
 const cancel = (outcome_key_opt: option<nat>, taddr): test_exec_result =>
@@ -95,7 +95,7 @@ const endVoteSuccess = (taddr): unit =>
 const executeSuccess = (k: nat, packed: bytes, taddr): unit =>
     Assert.txSuccess(execute(k, packed, taddr));
 
-const lockSuccess = (amount_: nat, taddr): unit =>
+export const lockSuccess = (amount_: nat, taddr): unit =>
     Assert.txSuccess (lock(amount_, taddr));
 
 const proposeSuccess = (proposal: DAO.Proposal.makeParams, taddr): unit =>
