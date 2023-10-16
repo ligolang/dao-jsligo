@@ -1,5 +1,7 @@
 #import "./token.jsligo" "Token_helper"
+
 #import "./dao.jsligo" "DAO_helper"
+
 #import "@ligo/fa/test/helpers/list.mligo" "List_helper"
 
 // Creates a proposal on [dao] with [tok] as governance_token,
@@ -12,37 +14,39 @@
 // Can lead to either accepted or rejected proposal, according to
 // the given [amount_] of tokens.
 // Requires appropriate config of various periods and delays
+
 const createAndVoteProposal = (
     tok: Token_helper.originated<
         parameter_of Token_helper.SingleAsset.SingleAsset,
         Token_helper.SingleAsset.SingleAsset.storage
-    >, 
-    dao: DAO_helper.originated, 
-    hash_: option<bytes>, 
+    >,
+    dao: DAO_helper.originated,
+    hash_: option<bytes>,
     votes: list<[int, nat, bool]>
-) : unit => {
+): unit => {
     // set up the sender for propose and end_vote entry points
+
     const sender_ = List_helper.nth_exn(1)(tok.owners);
-
     // impersonate token owners and call lock entry point
-    const callLock = ([nthAccount, amount_, _] : [int, nat, bool]) : unit => {
-        Test.set_source (List_helper.nth_exn(nthAccount)(tok.owners));
-        DAO_helper.lockSuccess(amount_, dao.taddr as parameter_of DAO_helper.DAO);
-    };
-    List.iter (callLock, votes);
 
+    const callLock = ([nthAccount, amount_, _]: [int, nat, bool]): unit => {
+        Test.set_source(List_helper.nth_exn(nthAccount)(tok.owners));
+        DAO_helper.lockSuccess(amount_, dao.taddr);
+    };
+    List.iter(callLock, votes);
     // create proposal
-    Test.set_source (sender_);
+
+    Test.
+    set_source(sender_);
     const proposal = { ...DAO_helper.dummyProposal, hash: hash_ };
-    DAO_helper.proposeSuccess(proposal, dao.contr);
-
+    DAO_helper.proposeSuccess(proposal, dao.taddr);
     // impersonate token owners and call vote entry point
-    const callVote = ([nthAccount, _, choice] : [int, nat, bool]) : unit => {
-        Test.set_source (List_helper.nth_exn(nthAccount)(tok.owners));
-        DAO_helper.voteSuccess(choice, dao.contr);
-    };
-    List.iter (callVote, votes);
 
-    Test.set_source (sender_);
-    DAO_helper.endVoteSuccess(dao.contr);
+    const callVote = ([nthAccount, _, choice]: [int, nat, bool]): unit => {
+        Test.set_source(List_helper.nth_exn(nthAccount)(tok.owners));
+        DAO_helper.voteSuccess(choice, dao.taddr);
+    };
+    List.iter(callVote, votes);
+    Test.set_source(sender_);
+    DAO_helper.endVoteSuccess(dao.taddr);
 }

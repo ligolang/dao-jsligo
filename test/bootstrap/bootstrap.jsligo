@@ -12,7 +12,7 @@
 // initTokAmount is the amount of token allocated to every
 // bootstrapped accounts
 
-const boot = (initTokAmount: nat, initStorage: DAO.storage) => {
+export const boot = (initTokAmount: nat, initStorage: DAO.storage) => {
     // Originate the token contract and the contract under test
 
     const tok = Token_helper.originate(initTokAmount);
